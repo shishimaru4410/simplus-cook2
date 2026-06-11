@@ -55,6 +55,7 @@
 </div>
 
 <script>
+// 公式データの定義
 const recipeData = {
     potato:  { weight: "150 〜 360 g", time: "18 〜 25 分", temp: "200 ℃", turn: "1 〜 2 回" },
     tonkatsu: { weight: "150 〜 300 g", time: "8 〜 15 分",  temp: "200 ℃", turn: "1 〜 2 回" },
@@ -73,6 +74,27 @@ function updateData() {
     document.getElementById("time").innerText = data.time;
     document.getElementById("temp").innerText = data.temp;
     document.getElementById("turn").innerText = data.turn;
+}
+
+// 🌐 【追加機能】ネットが切れてもスマホに保存して動かす魔法のプログラム
+const CACHE_NAME = 'simplus-cook-v1';
+const CACHE_FILES = [
+    window.location.pathname,
+    window.location.href
+];
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        // インターネット上のデータをスマホにキャッシュ（記憶）する仕組み
+        navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+            self.addEventListener('install', (e) => {
+                e.waitUntil(caches.open('${CACHE_NAME}').then((c) => c.addAll(['${window.location.pathname}'])));
+            });
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+            });
+        `));
+    });
 }
 </script>
 
