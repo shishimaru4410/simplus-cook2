@@ -10,11 +10,9 @@
         h1 { text-align: center; font-size: 18px; color: #222; margin: 0 0 5px 0; }
         .subtitle { text-align: center; font-size: 11px; color: #888; margin-bottom: 20px; }
         
-        /* 選択エリア */
         .label-text { font-weight: bold; font-size: 13px; margin-bottom: 6px; color: #444; display: block; }
         select, input { width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #fff; box-sizing: border-box; }
         
-        /* メインの4大設定カード（2段構成で大きく表示） */
         .dial-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
         .card { padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #ccc; }
         .card-orange { background: #fff9f2; border-color: #ffe0b2; }
@@ -24,12 +22,10 @@
         .blue-title { color: #004085; }
         .card-value { font-size: 18px; font-weight: bold; color: #111; }
         
-        /* サブ情報カード */
         .sub-card { background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #6c757d; margin-bottom: 20px; }
         .sub-title { font-size: 11px; color: #666; margin-bottom: 3px; }
         .sub-value { font-size: 14px; font-weight: bold; color: #333; }
         
-        /* 入力エリア */
         .add-box { background: #f1f3f5; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; }
         .add-box h3 { margin: 0 0 12px 0; font-size: 13px; color: #495057; }
         .input-group { margin-bottom: 8px; }
@@ -87,4 +83,164 @@
             <label>ダイヤルの温度設定</label>
             <select id="in-temp" style="margin-bottom:0;">
                 <option value="200 ℃">200 ℃（目盛り最大）</option>
-                <option value="180 ℃">180
+                <option value="180 ℃">180 ℃</option>
+                <option value="160 ℃">160 ℃</option>
+                <option value="140 ℃">140 ℃</option>
+                <option value="120 ℃">120 ℃</option>
+                <option value="100 ℃">100 ℃</option>
+                <option value="80 ℃">80 ℃（目盛り最小）</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>タイマーの時間（本調理）</label>
+            <input type="text" id="in-time" placeholder="15 分">
+        </div>
+        <div class="input-group">
+            <label>事前の予熱（おすすめ設定）</label>
+            <select id="in-preheat" style="margin-bottom:0;">
+                <option value="3 〜 5 分（推奨）">3 〜 5 分（空の状態で回す）</option>
+                <option value="不要">不要</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>途中の裏返し回数</label>
+            <select id="in-turn" style="margin-bottom:0;">
+                <option value="1 〜 2 回ひっくり返す">1 〜 2 回ひっくり返す</option>
+                <option value="1 〜 2 回全体を振る">1 〜 2 回全体を振る</option>
+                <option value="不要">不要</option>
+            </select>
+        </div>
+        <div class="input-group" style="margin-top:8px;">
+            <label>重量の目安（任意）</label>
+            <input type="text" id="in-weight" placeholder="2本 / 200g">
+        </div>
+        
+        <div class="btn-row">
+            <button class="btn-add" onclick="saveFood()">保存する</button>
+            <button class="btn-del" onclick="deleteFood()">この料理を消す</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 取扱説明書の確定初期データ
+const defaultRecipes = {
+    "冷凍フライドポテト": { temp: "200 ℃", time: "18 〜 25 分", preheat: "3 〜 5 分（推奨）", turn: "1 〜 2 回全体を振る", weight: "150 〜 360 g" },
+    "とんかつ／ステーキ": { temp: "200 ℃", time: "8 〜 15 分",  preheat: "3 〜 5 分（推奨）", turn: "1 〜 2 回ひっくり返す", weight: "150 〜 300 g" },
+    "唐揚げ":             { temp: "180 ℃", time: "20 〜 25 分", preheat: "3 〜 5 分（推奨）", turn: "1 〜 2 回ひっくり返す", weight: "200 〜 360 g" },
+    "エビフライ":         { temp: "180 ℃", time: "10 〜 15 分", preheat: "3 〜 5 分（推奨）", turn: "1 〜 2 回ひっくり返す", weight: "200 〜 400 g" },
+    "鶏肉と野菜のグリル": { temp: "180 ℃", time: "20 〜 25 分", preheat: "3 〜 5 分（推奨）", turn: "1 〜 2 回ひっくり返す", weight: "300 〜 500 g" },
+    "カップケーキ":       { temp: "180 ℃", time: "12 〜 15 分", preheat: "3 〜 5 分（推奨）", turn: "不要", weight: "100 〜 380 g" }
+};
+
+let myRecipes = {};
+
+function loadStorage() {
+    // 競合を防ぐため一意のキー名に固定
+    const saved = localStorage.getItem('simplus_perfect_v5_data');
+    if (saved) {
+        myRecipes = JSON.parse(saved);
+    } else {
+        // データがなければ公式データを必ずセットする
+        myRecipes = { ...defaultRecipes };
+        localStorage.setItem('simplus_perfect_v5_data', JSON.stringify(myRecipes));
+    }
+}
+
+function refreshSelect(selectName) {
+    const select = document.getElementById("food-select");
+    select.innerHTML = "";
+    
+    // データが空っぽになっていた場合の安全装置
+    if (Object.keys(myRecipes).length === 0) {
+        myRecipes = { ...defaultRecipes };
+        localStorage.setItem('simplus_perfect_v5_data', JSON.stringify(myRecipes));
+    }
+    
+    for (let key in myRecipes) {
+        let opt = document.createElement('option');
+        opt.value = key;
+        opt.innerHTML = key;
+        select.appendChild(opt);
+    }
+    
+    if (selectName && myRecipes[selectName]) {
+        select.value = selectName;
+    }
+    updateData();
+}
+
+function updateData() {
+    const select = document.getElementById("food-select");
+    const name = select.value;
+    
+    if (!name || !myRecipes[name]) return;
+    
+    const data = myRecipes[name];
+    document.getElementById("val-temp").innerText = data.temp;
+    document.getElementById("val-time").innerText = data.time;
+    document.getElementById("val-preheat").innerText = data.preheat || "3 〜 5 分（推奨）";
+    document.getElementById("val-turn").innerText = data.turn;
+    document.getElementById("val-weight").innerText = data.weight;
+    
+    document.getElementById("in-name").value = name;
+    document.getElementById("in-temp").value = data.temp;
+    document.getElementById("in-time").value = data.time;
+    document.getElementById("in-preheat").value = data.preheat || "3 〜 5 分（推奨）";
+    document.getElementById("in-turn").value = data.turn;
+    document.getElementById("in-weight").value = data.weight;
+}
+
+function saveFood() {
+    const name = document.getElementById("in-name").value.trim();
+    const temp = document.getElementById("in-temp").value;
+    const time = document.getElementById("in-time").value.trim() || "-";
+    const preheat = document.getElementById("in-preheat").value;
+    const turn = document.getElementById("in-turn").value;
+    const weight = document.getElementById("in-weight").value.trim() || "-";
+    
+    if (!name) {
+        alert("料理名を入力してください");
+        return;
+    }
+    
+    myRecipes[name] = { temp, time, preheat, turn, weight };
+    localStorage.setItem('simplus_perfect_v5_data', JSON.stringify(myRecipes));
+    
+    refreshSelect(name);
+    alert(name + " のデータを保存しました！");
+}
+
+function deleteFood() {
+    const name = document.getElementById("food-select").value;
+    if (!name) return;
+    
+    if (confirm(name + " を消去してもよろしいですか？")) {
+        delete myRecipes[name];
+        localStorage.setItem('simplus_perfect_v5_data', JSON.stringify(myRecipes));
+        refreshSelect();
+    }
+}
+
+// 起動処理
+loadStorage();
+refreshSelect();
+
+// 🌐 ネットワークなし対応
+const CACHE_NAME = 'simplus-perfect-v6';
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
+            self.addEventListener('install', (e) => {
+                e.waitUntil(caches.open('${CACHE_NAME}').then((c) => c.addAll(['${window.location.pathname}'])));
+            });
+            self.addEventListener('fetch', (e) => {
+                e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+            });
+        `));
+    });
+}
+</script>
+
+</body>
+</html>
