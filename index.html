@@ -3,160 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>キッチン調理ナビ</title>
+    <title>Simplus調理ナビ</title>
     <style>
-        body { font-family: sans-serif; background-color: #f4f4f9; color: #333; padding: 20px; margin: 0; }
-        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        h1 { text-align: center; font-size: 20px; color: #444; margin-bottom: 5px; }
-        .subtitle { text-align: center; font-size: 12px; color: #777; margin-bottom: 20px; }
+        body { font-family: sans-serif; background-color: #f5f6f8; color: #333; padding: 15px; margin: 0; }
+        .container { max-width: 480px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        h1 { text-align: center; font-size: 18px; color: #222; margin: 0 0 5px 0; }
+        .subtitle { text-align: center; font-size: 11px; color: #888; margin-bottom: 20px; }
         
-        /* タブ切り替えのデザイン */
-        .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { padding: 12px; font-size: 15px; font-weight: bold; border: none; border-radius: 5px; background: #e0e0e0; cursor: pointer; color: #555; }
-        .tab-btn.active { background: #28a745; color: white; }
+        /* 選択エリア */
+        .label-text { font-weight: bold; font-size: 13px; margin-bottom: 6px; color: #444; display: block; }
+        select, input { width: 100%; padding: 12px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; margin-bottom: 15px; background-color: #fff; box-sizing: border-box; }
         
-        select { width: 100%; padding: 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 20px; }
-        .data-card { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .card { background: #f9f9fb; padding: 15px; border-radius: 8px; border-left: 5px solid #007bff; }
-        .card-title { font-size: 12px; color: #666; margin-bottom: 5px; }
+        /* メインの4大設定カード（2段構成で大きく表示） */
+        .dial-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+        .card { padding: 12px; border-radius: 8px; text-align: center; border: 1px solid #ccc; }
+        .card-orange { background: #fff9f2; border-color: #ffe0b2; }
+        .card-blue { background: #f0f7ff; border-color: #cce5ff; }
+        .card-title { font-size: 11px; font-weight: bold; margin-bottom: 5px; }
+        .orange-title { color: #e65100; }
+        .blue-title { color: #004085; }
         .card-value { font-size: 18px; font-weight: bold; color: #111; }
-        .warning-box { background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; font-size: 13px; line-height: 1.6; border: 1px solid #ffeeba; }
-        .warning-title { font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-        ul { margin: 0; padding-left: 20px; }
+        
+        /* サブ情報カード */
+        .sub-card { background: #f8f9fa; padding: 12px; border-radius: 6px; border-left: 4px solid #6c757d; margin-bottom: 20px; }
+        .sub-title { font-size: 11px; color: #666; margin-bottom: 3px; }
+        .sub-value { font-size: 14px; font-weight: bold; color: #333; }
+        
+        /* 入力エリア */
+        .add-box { background: #f1f3f5; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; }
+        .add-box h3 { margin: 0 0 12px 0; font-size: 13px; color: #495057; }
+        .input-group { margin-bottom: 8px; }
+        .input-group label { display: block; font-size: 11px; color: #666; margin-bottom: 2px; }
+        
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+        button { width: 100%; padding: 12px; font-size: 14px; font-weight: bold; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-del { background: #dc3545; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🍳 キッチン調理ナビ</h1>
-    <div class="subtitle">公式説明書 確定データ一覧</div>
+    <h1>🍳 Simplus 調理ナビ</h1>
+    <div class="subtitle">アナログダイヤル（SP-FR01）専用メモ</div>
 
-    <div class="tabs">
-        <button id="btn-airfryer" class="tab-btn active" onclick="switchMode('airfryer')">Simplus ノンフライヤー</button>
-        <button id="btn-lacook" class="tab-btn" onclick="switchMode('lacook')">パロマ ラ・クック</button>
-    </div>
-
-    <label for="food-select" style="font-weight: bold; display: block; margin-bottom: 8px;">食材を選択してください：</label>
+    <label class="label-text">料理を選ぶ：</label>
     <select id="food-select" onchange="updateData()"></select>
 
-    <div class="data-card">
-        <div class="card"><div class="card-title" id="title-1">🌡️ 調理温度</div><div class="card-value" id="val-1">-</div></div>
-        <div class="card"><div class="card-title" id="title-2">⏳ 調理時間</div><div class="card-value" id="val-2">-</div></div>
-        <div class="card"><div class="card-title" id="title-3">⚖️ 重量目安</div><div class="card-value" id="val-3">-</div></div>
-        <div class="card"><div class="card-title" id="title-4">🔄 裏返し回数</div><div class="card-value" id="val-4">-</div></div>
+    <div class="dial-grid">
+        <div class="card card-orange">
+            <div class="card-title orange-title">🌡️ 上のダイヤル（温度）</div>
+            <div class="card-value" id="val-temp">-</div>
+        </div>
+        <div class="card card-orange">
+            <div class="card-title orange-title">⏳ 下のダイヤル（本調理時間）</div>
+            <div class="card-value" id="val-time">-</div>
+        </div>
     </div>
 
-    <div class="warning-box">
-        <div class="warning-title" id="warning-title">⚠️ 注意事項</div>
-        <div id="warning-content"></div>
+    <div class="dial-grid">
+        <div class="card card-blue">
+            <div class="card-title blue-title">🔥 1. 事前の予熱（空焼き）</div>
+            <div class="card-value" id="val-preheat">-</div>
+        </div>
+        <div class="card card-blue">
+            <div class="card-title blue-title">🔄 2. 途中の裏返し</div>
+            <div class="card-value" id="val-turn">-</div>
+        </div>
     </div>
-</div>
 
-<script>
-// 1. ノンフライヤーのデータ
-const airfryerData = {
-    potato:   { name: "冷凍フライドポテト",  v1: "200 ℃", v2: "18 〜 25 分", v3: "150 〜 360 g", v4: "1 〜 2 回" },
-    tonkatsu: { name: "とんかつ／ステーキ",  v1: "200 ℃", v2: "8 〜 15 分",  v3: "150 〜 300 g", v4: "1 〜 2 回" },
-    karaage:  { name: "唐揚げ",              v1: "180 ℃", v2: "20 〜 25 分", v3: "200 〜 360 g", v4: "1 〜 2 回" },
-    shrimp:   { name: "エビフライ",          v1: "180 ℃", v2: "10 〜 15 分", v3: "200 〜 400 g", v4: "1 〜 2 回" },
-    grill:    { name: "鶏肉と野菜のグリル",  v1: "180 ℃", v2: "20 〜 25 分", v3: "300 〜 500 g", v4: "1 〜 2 回" },
-    cupcake:  { name: "カップケーキ",        v1: "180 ℃", v2: "12 〜 15 分", v3: "100 〜 380 g", v4: "なし" }
-};
+    <div class="sub-card">
+        <div class="sub-title">⚖️ 重量の目安</div>
+        <div class="sub-value" id="val-weight">-</div>
+    </div>
 
-// 2. ラ・クックの公式基本データ（魚・肉・ケーキなど）
-const lacookData = {
-    fish_kirimi: { name: "魚の切り身（鮭・サバなど）", v1: "標準モード", v2: "7 〜 9 分",  v3: "2 〜 4 切れ", v4: "不要（フタあり）" },
-    fish_sugata: { name: "魚の姿焼き（アジ・イワシ）", v1: "標準モード", v2: "9 〜 11 分", v3: "2 〜 4 匹",   v4: "不要（フタあり）" },
-    chicken:     { name: "鶏もも肉の塩焼き（一枚肉）", v1: "強火力モード", v2: "11 〜 13 分", v3: "1枚 (約250g)", v4: "不要（フタあり）" },
-    hamburg:     { name: "ハンバーグ（生から調理）",   v1: "標準モード", v2: "10 〜 12 分", v3: "2 〜 4 個",   v4: "不要（フタあり）" },
-    pork:        { name: "豚ロースステーキ肉",         v1: "標準モード", v2: "8 〜 10 分",  v3: "2枚 (約200g)", v4: "不要（フタあり）" },
-    sponge:      { name: "簡単パウンドケーキ",         v1: "弱火力モード", v2: "13 〜 15 分", v3: "市販ミックス粉", v4: "不要（フタあり）" }
-};
-
-let currentMode = 'airfryer';
-
-function switchMode(mode) {
-    currentMode = mode;
-    document.getElementById('btn-airfryer').className = 'tab-btn' + (mode === 'airfryer' ? ' active' : '');
-    document.getElementById('btn-lacook').className = 'tab-btn' + (mode === 'lacook' ? ' active' : '');
-    
-    // カードのタイトルをモードに合わせて変更
-    if (mode === 'airfryer') {
-        document.getElementById('title-1').innerText = "🌡️ 調理温度";
-        document.getElementById('title-4').innerText = "🔄 裏返し回数";
-    } else {
-        document.getElementById('title-1').innerText = "🔥 グリル火力";
-        document.getElementById('title-4').innerText = "蓋（フタ）の有無";
-    }
-    
-    initSelect();
-}
-
-function initSelect() {
-    const select = document.getElementById("food-select");
-    select.innerHTML = "";
-    const dataSet = currentMode === 'airfryer' ? airfryerData : lacookData;
-    
-    for (let key in dataSet) {
-        let opt = document.createElement('option');
-        opt.value = key;
-        opt.innerHTML = dataSet[key].name;
-        select.appendChild(opt);
-    }
-    updateData();
-}
-
-function updateData() {
-    const select = document.getElementById("food-select");
-    const selectedValue = select.value;
-    if (!selectedValue) return;
-    
-    const data = currentMode === 'airfryer' ? airfryerData[selectedValue] : lacookData[selectedValue];
-    
-    document.getElementById("val-1").innerText = data.v1;
-    document.getElementById("val-2").innerText = data.v2;
-    document.getElementById("val-3").innerText = data.v3;
-    document.getElementById("val-4").innerText = data.v4;
-    
-    // 注意事項の書き換え
-    const warnContent = document.getElementById("warning-content");
-    if (currentMode === 'airfryer') {
-        document.getElementById("warning-title").innerText = "⚠️ ノンフライヤーの注意事項";
-        warnContent.innerHTML = `<ul>
-            <li><b>冷凍調理物:</b> 自然解凍し、水気を拭き取ってから調理してください。</li>
-            <li><b>条件の変動:</b> 食材の大きさや形で条件は変わります。様子を見ながら調節してください。</li>
-            <li><b>配置・下処理:</b> 大きさ・厚みをそろえます。身の厚い肉は切れ目を入れ、反るものは串を通してください。</li>
-            <li><b>油の使用:</b> 調理物によっては少量の油を吹きかけてください。</li>
-        </ul>`;
-    } else {
-        document.getElementById("warning-title").innerText = "⚠️ ラ・クックの注意事項";
-        warnContent.innerHTML = `<ul>
-            <li><b>基本はフタを使用:</b> 基本の自動・手動調理は、専用のフタをカチッと閉めた状態で使用してください。</li>
-            <li><b>余熱は不要:</b> ノンフライヤーと違い、グリル内の事前の予熱（あたため）は必要ありません。</li>
-            <li><b>油の薄敷き:</b> 魚や肉の皮がくっつくのを防ぐため、あらかじめプレート底面にハケなどで薄くサラダ油を塗っておくと綺麗に剥がれます。</li>
-            <li><b>調理後の余熱:</b> 加熱終了後、フタを閉じたまま1〜2分置いておくと、余熱で中までふっくら仕上がります。</li>
-        </ul>`;
-    }
-}
-
-// 最初の起動時
-switchMode('airfryer');
-
-// 🌐 ネットが切れても動かすプログラム
-const CACHE_NAME = 'kitchen-cook-v2';
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('data:text/javascript;base64,' + btoa(`
-            self.addEventListener('install', (e) => {
-                e.waitUntil(caches.open('${CACHE_NAME}').then((c) => c.addAll(['${window.location.pathname}'])));
-            });
-            self.addEventListener('fetch', (e) => {
-                e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
-            });
-        `));
-    });
-}
-</script>
-
-</body>
-</html>
+    <div class="add-box">
+        <h3>➕ 自分好みの調理データを登録・上書き</h3>
+        <div class="input-group">
+            <label>料理名（例：焼き茄子）</label>
+            <input type="text" id="in-name" placeholder="新しい料理名を入力">
+        </div>
+        <div class="input-group">
+            <label>ダイヤルの温度設定</label>
+            <select id="in-temp" style="margin-bottom:0;">
+                <option value="200 ℃">200 ℃（目盛り最大）</option>
+                <option value="180 ℃">180
